@@ -11,6 +11,7 @@ def compile(file):
     running = False
     windowName = ""
     windowSize = ""
+    window = -1
 
     for line in source:
         #print(line)
@@ -28,6 +29,9 @@ def compile(file):
             windowName = splitted[1]
             windowSize = (int(splitted[2]), int(splitted[3]))
 
+            window = pygame.display.set_mode(windowSize)
+            exec("pygame.display.set_caption(" + windowName + ")")
+
             running = True
         elif line == "close":
             if window != -1:
@@ -40,8 +44,6 @@ def compile(file):
             b = splitted[3]
             fillColor = (int(r), int(g), int(b))
 
-            window = pygame.display.set_mode(windowSize)
-            exec("pygame.display.set_caption(" + windowName + ")")
 
             while running:
                 for event in pygame.event.get():
