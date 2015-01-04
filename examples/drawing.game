@@ -1,0 +1,9 @@
+print "Hello!"
+
+start "DrawingExample" 800 600
+
+draw_image /Users/WilsonKoder/Desktop/Programming/GameLang/examples/player.png 30 30
+
+base_gameLoop 0 255 0
+
+close

@@ -13,6 +13,7 @@ def game_compile(file):
     windowName = ""
     windowSize = ""
     window = -1
+    images = []
 
     for line in source:
         #print(line)
@@ -37,7 +38,17 @@ def game_compile(file):
         elif line == "close":
             if window != -1:
                 pygame.quit()
-            sys.exit()
+                sys.exit()
+
+        if "draw_image" in line:
+            splitted = line.split(" ")
+            path_to_image = splitted[1]
+            posX = splitted[2].rstrip()
+            posY = splitted[3].rstrip()
+            pos = (int(posX), int(posY))
+            image = pygame.image.load(path_to_image)
+            images.append([image, pos])
+
         elif "base_gameLoop" in line:
             splitted = line.split(" ")
             r = splitted[1]
@@ -45,13 +56,19 @@ def game_compile(file):
             b = splitted[3]
             fillColor = (int(r), int(g), int(b))
 
-
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
 
                 window.fill(fillColor)
+
+                for image in images:
+                    actualImage = image[0]
+                    imagePos = image[1]
+                    window.blit(actualImage, imagePos)
                 pygame.display.flip()
+
+
 
 game_compile(fileName)
