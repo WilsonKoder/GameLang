@@ -2,4 +2,5 @@ print "JELLO!"
 x is "YO!"
 print x
 start "window!!!!!" 800 600
+base_gameLoop 255 0 0
 close

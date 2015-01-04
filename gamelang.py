@@ -8,7 +8,7 @@ fileName = sys.argv[1]
 def compile(file):
 
     source = open(file)
-    window = 0
+    window = -1
     running = False
 
     for line in source:
@@ -29,9 +29,23 @@ def compile(file):
             exec("pygame.display.set_caption(" + windowName + ")")
             running = True
         elif line == "close":
-            if window != 0:
+            if window != -1:
                 pygame.quit()
             sys.exit()
+        elif "base_gameLoop" in line:
+            splitted = line.split(" ")
+            r = splitted[1]
+            g = splitted[2]
+            b = splitted[3]
+            fillColor = (int(r), int(g), int(b))
+
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+
+                pygame.display.flip()
+
 
 
 
