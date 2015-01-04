@@ -5,7 +5,8 @@ import sys
 
 fileName = sys.argv[1]
 
-def compile(file):
+
+def game_compile(file):
 
     source = open(file)
     running = False
@@ -53,4 +54,4 @@ def compile(file):
                 window.fill(fillColor)
                 pygame.display.flip()
 
-compile(fileName)
+game_compile(fileName)
