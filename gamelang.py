@@ -8,8 +8,9 @@ fileName = sys.argv[1]
 def compile(file):
 
     source = open(file)
-    window = -1
     running = False
+    windowName = ""
+    windowSize = ""
 
     for line in source:
         #print(line)
@@ -22,11 +23,11 @@ def compile(file):
             varVal = splitted[1]
             exec(varName + " = " + varVal)
         elif "start" in line:
+            pygame.init()
             splitted = line.split(" ")
             windowName = splitted[1]
             windowSize = (int(splitted[2]), int(splitted[3]))
-            window = exec("pygame.display.set_mode(" + "(" + splitted[2] + ", " + splitted[3] + ")" + ")")
-            exec("pygame.display.set_caption(" + windowName + ")")
+
             running = True
         elif line == "close":
             if window != -1:
@@ -39,14 +40,15 @@ def compile(file):
             b = splitted[3]
             fillColor = (int(r), int(g), int(b))
 
+            window = pygame.display.set_mode(windowSize)
+            exec("pygame.display.set_caption(" + windowName + ")")
+
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
 
+                window.fill(fillColor)
                 pygame.display.flip()
-
-
-
 
 compile(fileName)
