@@ -2,7 +2,18 @@ print "Hello!"
 
 start "DrawingExample" 800 600
 
-draw_image /Users/WilsonKoder/Desktop/Programming/GameLang/examples/player.png 30 30
+xpos is 400
+ypos is 300
+
+#handle_input UP 5 ypos player
+#handle_input DOWN 5 ypos player
+#handle_input LEFT 5 xpos player
+#handle_input RIGHT 5 xpos player
+
+print xpos
+print ypos
+
+draw_image /Users/WilsonKoder/Desktop/Programming/GameLang/examples/player.png 400 300 player
 
 base_gameLoop 0 255 0
 
