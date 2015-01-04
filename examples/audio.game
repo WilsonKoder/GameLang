@@ -1,0 +1,4 @@
+start "Audio!" 800 600
+play_audio Powerup70.wav
+base_gameLoop 255 0 0
+close

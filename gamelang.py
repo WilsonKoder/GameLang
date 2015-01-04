@@ -1,10 +1,11 @@
 __author__ = 'WilsonKoder'
 
 import pygame
+import pygame.mixer
 import sys
 
 fileName = sys.argv[1]
-
+pygame.mixer.init()
 
 def game_compile(file):
 
@@ -16,6 +17,7 @@ def game_compile(file):
     images = []
     imgID = 0
     movementVariables = []
+    audioFilePath = ""
 
     for line in source:
         if "print" in line:
@@ -73,13 +75,21 @@ def game_compile(file):
             image = pygame.image.load(path_to_image)
             images.append([image, pos, imgID])
 
+        elif "audio_play" in line:
+            if window == -1:
+                print("can't play music without a window")
+
+            splitted = line.split(" ")
+            filePath = splitted[1]
+            audioFilePath = filePath
+
         elif "base_gameLoop" in line:
             splitted = line.split(" ")
             r = splitted[1]
             g = splitted[2]
             b = splitted[3]
             fillColor = (int(r), int(g), int(b))
-
+            musicFilePath = ""
             # moveUp = False
             # moveDown = False
             # moveLeft = False
@@ -89,6 +99,12 @@ def game_compile(file):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
+
+                if musicFilePath != audioFilePath:
+                    musicFilePath = audioFilePath
+                    pygame.mixer.music.load(musicFilePath)
+                    pygame.mixer.music.stop()
+                    pygame.mixer.music.play()
                     # if event.type == pygame.KEYDOWN:
                     #     if event.key == pygame.K_UP or pygame.K_w:
                     #         moveUp = True
