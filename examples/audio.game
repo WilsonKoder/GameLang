@@ -1,4 +1,18 @@
-start "Audio!" 800 600
-play_audio Powerup70.wav
-base_gameLoop 255 0 0
-close
+window "Helloooo!" 800 600
+
+xpos is 5
+ypos is 5
+print: ypos
+
+start_loop
+
+draw_image examples/player.png xpos ypos
+
+input up ypos 5
+input down ypos 5
+input left xpos 5
+input right xpos 5
+
+end_loop
+
+loop

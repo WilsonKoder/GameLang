@@ -6,174 +6,161 @@ import sys
 
 fileName = sys.argv[1]
 pygame.mixer.init()
+pygame.init()
+
+variables = {}
+game_loop = []
 
 def game_compile(file):
 
     source = open(file)
     running = False
-    windowName = ""
-    windowSize = ""
-    window = -1
+    variables["windowName"] = ""
+    variables["windowSize"] = []
+    def_game_loop = False
     images = []
-    imgID = 0
-    movementVariables = []
-    audioFilePath = ""
+
+    moveUp = False
+    moveDown = False
+    moveLeft = False
+    moveRight = False
 
     for line in source:
+        # core lang functions
         if "print" in line:
-            splitted = line.split(" ")
-            exec("print(" + splitted[1] + ")")
-        elif "is" in line:
+            splitted = line.split(": ")
+            printText = splitted[1].rstrip()
+            if "\"" not in splitted[1]:
+                print(str(variables[printText]).rstrip())
+            else:
+                print(str(printText).replace("\"", ""))
+        if "is" in line:
             splitted = line.split("is")
-            varName = splitted[0]
-            varVal = splitted[1]
-            exec(varName + " = " + varVal)
-        elif "start" in line:
-            pygame.init()
-            splitted = line.split(" ")
+            varName = splitted[0].rstrip().replace(" ", "")
+            varVal = splitted[1].rstrip().replace(" ", "")
+            variables[varName] = varVal
+
+        # game specific functions
+
+        elif "window" in line:
+            splitted = line.split()
             windowName = splitted[1]
-            windowSize = (int(splitted[2]), int(splitted[3]))
-
-            window = pygame.display.set_mode(windowSize)
-            exec("pygame.display.set_caption(" + windowName + ")")
-
+            windowResX = int(splitted[2])
+            windowResY = int(splitted[3])
+            variables["windowSize"] = [windowResX, windowResY]
+            variables["window"] = pygame.display.set_mode(variables["windowSize"])
+            variables["windowName"] = windowName
             running = True
+            pygame.display.set_caption(variables["windowName"])
+        elif "end_window" in line:
+            running = False
 
-        # elif "handle_input" in line:
-        #
-        #     # Usage: handle_input UP 5
-        #
-        #     splitted = line.split(" ")
-        #     if splitted[1] == "UP":
-        #         upMoveInterval = abs(int(splitted[2]))
-        #         movementVariables.append([splitted[1], upMoveInterval, splitted[3].rstrip(), splitted[4].rstrip()])
-        #     elif splitted[1] == "DOWN":
-        #         downMoveInterval = abs(int(splitted[2]))
-        #         movementVariables.append([splitted[1], downMoveInterval, splitted[3].rstrip(), splitted[4].rstrip()])
-        #     elif splitted[1] == "LEFT":
-        #         leftMoveInterval = abs(int(splitted[2]))
-        #         movementVariables.append([splitted[1], leftMoveInterval, splitted[3].rstrip(), splitted[4].rstrip()])
-        #     elif splitted[1] == "RIGHT":
-        #         rightMoveInterval = abs(int(splitted[2]))
-        #         movementVariables.append([splitted[1], rightMoveInterval, splitted[3].rstrip(), splitted[4].rstrip()])
+        elif "start_loop" in line:
+            if not def_game_loop:
+                def_game_loop = True
+        elif "end_loop" in line:
+            if def_game_loop:
+                def_game_loop = False
+        # drawing
+        elif "draw_image" in line:
+            if def_game_loop:
+                splitted = line.split(" ")
+                PATH = splitted[1]
+                xPosition = splitted[2]
+                yPosition = splitted[3].rstrip()
 
-        elif line == "close":
-            if window != -1:
-                pygame.quit()
-                sys.exit()
+                position = [0, 0]
 
-        if "draw_image" in line:
+                if xPosition in variables:
+                    position[0] = int(variables[xPosition])
+                else:
+                    position[0] = 0
+
+                if yPosition in variables:
+                    position[1] = int(variables[yPosition])
+                else:
+                    position[1] = 0
+
+                image = pygame.image.load(PATH)
+                images.append([image, position])
+
+        elif "input" in line:
+            # usage: input up ypos 5
             splitted = line.split(" ")
-            path_to_image = splitted[1]
-            posX = 400
-            posY = 300
-            exec("posX = " + splitted[2].rstrip())  # why isn't this working?
-            exec("posY = " + splitted[3].rstrip())  # why isn't this working?
-            print(posX)
-            imgID = splitted[4].rstrip()
-            pos = [int(posX), int(posY)]
-            image = pygame.image.load(path_to_image)
-            images.append([image, pos, imgID])
+            direction = splitted[1]
+            moveVar = splitted[2]
+            val = int(splitted[3])
+            if def_game_loop:
+                if direction.lower() == "up":
+                    game_loop.append(["variables[" + moveVar + "] -= " + str(val), "up"])
+                elif direction.lower() == "left":
+                    game_loop.append(["variables[" + moveVar + "] -= " + str(val), "left"])
 
-        elif "audio_play" in line:
-            if window == -1:
-                print("can't play music without a window")
-
+                elif direction.lower() == "down":
+                    game_loop.append(["variables[" + moveVar + "] += " + str(val), "down"])
+                elif direction.lower() == "right":
+                    game_loop.append(["variables[" + moveVar + "] += " + str(val), "right"])
+        if line == "loop":
             splitted = line.split(" ")
-            filePath = splitted[1]
-            audioFilePath = filePath
+            #fill_r = int(splitted[1])
+            #fill_g = int(splitted[2])
+            #fill_b = int(splitted[3])
 
-        elif "base_gameLoop" in line:
-            splitted = line.split(" ")
-            r = splitted[1]
-            g = splitted[2]
-            b = splitted[3]
-            fillColor = (int(r), int(g), int(b))
-            musicFilePath = ""
-            # moveUp = False
-            # moveDown = False
-            # moveLeft = False
-            # moveRight = False
-
+            #fill_color = (fill_r, fill_g, fill_b)
+            fill_color = (0, 255, 0)
             while running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_w or pygame.K_UP:
+                            moveUp = True
+                        elif event.key == pygame.K_s or pygame.K_DOWN:
+                            moveDown = True
+                        elif event.key == pygame.K_a or pygame.K_LEFT:
+                            moveLeft = True
+                        elif event.key == pygame.K_d or pygame.K_RIGHT:
+                            moveRight = True
+                    elif event.type == pygame.KEYUP:
+                        if event.key == pygame.K_w or pygame.K_UP:
+                            moveUp = False
+                        elif event.key == pygame.K_s or pygame.K_DOWN:
+                            moveDown = False
+                        elif event.key == pygame.K_a or pygame.K_LEFT:
+                            moveLeft = False
+                        elif event.key == pygame.K_d or pygame.K_RIGHT:
+                            moveRight = False
 
-                if musicFilePath != audioFilePath:
-                    musicFilePath = audioFilePath
-                    pygame.mixer.music.load(musicFilePath)
-                    pygame.mixer.music.stop()
-                    pygame.mixer.music.play()
-                    # if event.type == pygame.KEYDOWN:
-                    #     if event.key == pygame.K_UP or pygame.K_w:
-                    #         moveUp = True
-                    #     elif event.key == pygame.K_DOWN or pygame.K_s:
-                    #         moveDown = True
-                    #     elif event.key == pygame.K_LEFT or pygame.K_a:
-                    #         moveLeft = True
-                    #     elif event.key == pygame.K_RIGHT or pygame.K_d:
-                    #         moveRight = True
-                    #
-                    # elif event.type == pygame.KEYUP:
-                    #     if event.key == pygame.K_UP or pygame.K_w:
-                    #         moveUp = False
-                    #     elif event.key == pygame.K_DOWN or pygame.K_s:
-                    #         moveDown = False
-                    #     elif event.key == pygame.K_LEFT or pygame.K_a:
-                    #         moveLeft = False
-                    #     elif event.key == pygame.K_RIGHT or pygame.K_d:
-                    #         moveRight = False
+                if moveUp:
+                    for command in game_loop:
+                        for string in command:
+                            if string == "up":
+                                exec(command[0])
 
-                # if moveUp:
-                #     for var in movementVariables:
-                #         if var[0] == "UP":
-                #             exec(var[2] + " -= " + str(var[1]))
-                #             exec("print(" + var[2] + ")")
-                #             for image in images:
-                #                 if image[2] == var[3]:
-                #                     exec("image[1][1] = " + var[2])
-                #
-                # elif moveDown:
-                #     for var in movementVariables:
-                #         if var[0] == "DOWN":
-                #             exec(var[2] + " += " + str(var[1]))
-                #             exec("print(" + var[2] + ")")
-                #             for image in images:
-                #                 if image[2] == var[3]:
-                #                     exec("image[1][1] = " + var[2])
-                # if moveLeft:
-                #     for var in movementVariables:
-                #         if var[0] == "LEFT":
-                #             print(var[2])
-                #             exec(var[2] + " -= " + str(var[1]))  # var[2] is variable name (xpos, ypos)
-                #             exec("print(" + var[2] + ")")
-                #             print(var[2])
-                #             for image in images:
-                #                 if image[2] == var[3]:
-                #                     exec("image[1][0] = " + var[2])
-                #         else:
-                #             print("test")
-                # elif moveRight:
-                #     for var in movementVariables:
-                #         if var[0] == "RIGHT":
-                #             exec(var[2] + " += " + str(var[1]))
-                #             exec("print(" + var[2] + ")")
-                #             for image in images:
-                #                 if image[2] == var[3]:
-                #                     exec("image[1][0] = " + var[2])
-                #         else:
-                #             print("?")
+                if moveDown:
+                    for command in game_loop:
+                        for string in command:
+                            if string == "down":
+                                exec(command[0])
+                if moveLeft:
+                    for command in game_loop:
+                        for string in command:
+                            if string == "left":
+                                exec(command[0])
+                if moveRight:
+                    for command in game_loop:
+                        for string in command:
+                            if string == "right":
+                                exec(command[0])
 
-                window.fill(fillColor)
+                #for command in game_loop:
+                #    if "up" or "down" or "left" or "right" not in command:
+                #        exec(command[0])
+
+                variables["window"].fill(fill_color)
 
                 for image in images:
-                    actualImage = image[0]
-                    imagePos = image[1]
-                    window.blit(actualImage, imagePos)
+                    variables["window"].blit(image[0], image[1])
 
                 pygame.display.flip()
-
-
-
 game_compile(fileName)
